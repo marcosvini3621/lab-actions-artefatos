@@ -1,0 +1,47 @@
+name: pipeline-inteligente
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 2 * * *"
+
+  push:
+    branches:
+      - 'feature/**'
+    paths:
+      - 'src/**'
+      - '!src/docs/**'
+
+jobs:
+  job_gerador:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Criando arquivos de build
+        run: |
+          mkdir saida_build
+          echo "Relatorio 1 funcionando" > saida_build/relatorio1.txt
+          echo "Relatorio 2 funcionando" > saida_build/relatorio2.txt
+
+      - name: Upload de artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+          path: saida_build/
+
+  job_auditoria:
+    runs-on: ubuntu-latest
+    needs: job_gerador
+
+    steps:
+      - name: Download dos artefatos
+        uses: actions/download-artifact@v4
+        with:
+          name: meus-relatorios-oficiais
+
+      - name: Listar arquivos
+        run: ls -R
+
+      - name: Ler relatorio
+        run: cat relatorio1.txt
